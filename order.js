@@ -67,6 +67,28 @@ document.addEventListener('DOMContentLoaded', () => {
   let uploadedImages = [];
   const MAX_IMAGES = 5;
 
+  function getSelectedBranch() {
+    const name = document.querySelector('input[name="branchSelect"]:checked')?.value;
+    return window.NominBranches?.getByName(name) || null;
+  }
+
+  function bindBranchEvents() {
+    document.querySelectorAll('input[name="branchSelect"]').forEach(radio => {
+      if (radio.dataset.bound === '1') return;
+      radio.dataset.bound = '1';
+      radio.addEventListener('change', () => {
+        const branchError = document.getElementById('branchSelectError');
+        if (branchError) branchError.style.display = 'none';
+        renderOrderType();
+      });
+    });
+  }
+
+  document.addEventListener('nomin:branches-rendered', () => {
+    bindBranchEvents();
+    renderOrderType();
+  });
+
   // ========== SET BADGE & TYPE TOGGLE ==========
   const btnTypeStandard = document.getElementById('btnTypeStandard');
   const btnTypeExpress = document.getElementById('btnTypeExpress');
@@ -75,17 +97,26 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderOrderType() {
     const selectedBranch = document.querySelector('input[name="branchSelect"]:checked');
     const branch = selectedBranch ? selectedBranch.value : null;
-    const isBranch2 = branch && branch.includes('2');
+    const selectedBranchData = getSelectedBranch();
 
     // Determine price display text based on branch selection
     let expressPrice, standardPrice;
     if (!branch) {
       // No branch selected yet - show price range
-      expressPrice = '2,500~3,000';
-      standardPrice = '1,800~2,000';
+      const branches = window.NominBranches?.items || [];
+      const expressPrices = branches.map(item => Number(item.express_price)).filter(Boolean);
+      const standardPrices = branches.map(item => Number(item.standard_price)).filter(Boolean);
+      const formatRange = prices => {
+        if (!prices.length) return '0';
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        return min === max ? min.toLocaleString() : `${min.toLocaleString()}~${max.toLocaleString()}`;
+      };
+      expressPrice = formatRange(expressPrices);
+      standardPrice = formatRange(standardPrices);
     } else {
-      expressPrice = isBranch2 ? '3,000' : '2,500';
-      standardPrice = isBranch2 ? '2,000' : '1,800';
+      expressPrice = Number(selectedBranchData?.express_price || 0).toLocaleString();
+      standardPrice = Number(selectedBranchData?.standard_price || 0).toLocaleString();
     }
 
     if (isExpress) {
@@ -124,10 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pricePreviewArea.classList.remove('flex');
         pricePreviewArea.classList.add('hidden');
      } else {
-        const branch = document.querySelector('input[name="branchSelect"]:checked')?.value || 'Салбар 1';
-        const isBranch2 = branch.includes('2');
-        const rateStandard = isBranch2 ? 2000 : 1800;
-        const rateExpress = isBranch2 ? 3000 : 2500;
+        const branchData = getSelectedBranch() || window.NominBranches?.items?.[0];
+        const rateStandard = Number(branchData?.standard_price || 0);
+        const rateExpress = Number(branchData?.express_price || 0);
         const rate = isExpress ? rateExpress : rateStandard;
         const total = Math.round(weight * rate);
         pricePreviewText.textContent = total.toLocaleString() + ' ₩';
@@ -403,13 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Hide branch error on change
-  document.querySelectorAll('input[name="branchSelect"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      const branchError = document.getElementById('branchSelectError');
-      if (branchError) branchError.style.display = 'none';
-      renderOrderType();
-    });
-  });
+  bindBranchEvents();
 
   document.querySelectorAll('.form-input').forEach(input => {
     input.addEventListener('input', () => {
@@ -517,9 +541,9 @@ document.addEventListener('DOMContentLoaded', () => {
           const w = parseFloat(weightInputRaw);
           if (!isNaN(w) && w > 0) {
               finalWeight = w.toString();
-              const isBranch2 = orderData.branch && orderData.branch.includes('2');
-              const rateStandard = isBranch2 ? 2000 : 1800;
-              const rateExpress = isBranch2 ? 3000 : 2500;
+              const branchData = window.NominBranches?.getByName(orderData.branch);
+              const rateStandard = Number(branchData?.standard_price || 0);
+              const rateExpress = Number(branchData?.express_price || 0);
               const finalRate = isExpress ? rateExpress : rateStandard;
               finalPrice = Math.round(w * finalRate).toString();
           }

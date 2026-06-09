@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Салбар удирдлага - Админ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { primary: '#3B82F6', surface: '#F0F4FF' },
+      fontFamily: { body: ['Inter', 'system-ui', 'sans-serif'] },
+      boxShadow: { card: '0 1px 3px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.04)' }
+    }}};
+  </script>
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; background: #F0F4FF; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  </style>
+  <script>
+    if (!localStorage.getItem('admin_session')) location.href = 'admin-login';
+    function logoutAdmin(event) {
+      event.preventDefault();
+      localStorage.removeItem('admin_session');
+      location.href = 'admin-login';
+    }
+  </script>
+</head>
+<body class="text-slate-900 min-h-screen">
+  <header class="fixed top-0 right-0 left-0 lg:left-[260px] z-40 h-16 bg-white/90 backdrop-blur border-b border-slate-100 flex items-center px-5 lg:px-8">
+    <h1 class="font-bold text-[18px]">Салбар удирдлага</h1>
+    <button onclick="toggleSidebar()" class="lg:hidden ml-auto">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+  </header>
+
+  <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 z-40 bg-slate-900/40 hidden lg:hidden"></div>
+  <aside id="sidebar" class="fixed z-50 top-0 left-0 w-[260px] h-full bg-white border-r border-slate-100 -translate-x-full lg:translate-x-0 transition-transform flex flex-col">
+    <div class="h-16 flex items-center px-6 gap-3">
+      <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+      </div>
+      <span class="font-black text-[18px]">Nomin Cargo</span>
+      <button onclick="toggleSidebar()" class="lg:hidden ml-auto"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <nav class="flex-1 px-4 py-5 space-y-1 text-[13px] font-semibold">
+      <a href="admin" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">dashboard</span>Самбар</a>
+      <a href="admin-orders" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">inventory_2</span>Захиалгууд</a>
+      <a href="admin-branches" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-primary bg-blue-50"><span class="material-symbols-outlined text-[20px]">storefront</span>Салбар удирдлага</a>
+      <a href="admin-containers" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">view_in_ar</span>Контейнер</a>
+      <a href="admin-banners" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">map</span>Баннер</a>
+      <a href="admin-notifications" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">campaign</span>Мэдэгдэл</a>
+    </nav>
+    <a href="#" onclick="logoutAdmin(event)" class="m-5 flex items-center gap-2 text-red-500 text-[13px] font-semibold"><span class="material-symbols-outlined text-[18px]">logout</span>Гарах</a>
+  </aside>
+
+  <main class="pt-20 pb-12 px-4 lg:ml-[260px] lg:px-8 max-w-7xl">
+    <div class="grid lg:grid-cols-[380px_1fr] gap-6">
+      <section class="bg-white rounded-3xl p-5 shadow-card border border-blue-100/50 h-fit">
+        <div class="flex items-center justify-between mb-5">
+          <h2 id="form-title" class="font-bold text-[16px]">Шинэ салбар нэмэх</h2>
+          <button id="cancel-btn" onclick="resetForm()" class="hidden text-[12px] font-bold text-slate-500 bg-slate-100 rounded-lg px-3 py-1.5">Болих</button>
+        </div>
+        <form id="branch-form" class="space-y-3">
+          <input type="hidden" id="branch-id">
+          <label class="block"><span class="text-[12px] font-bold text-slate-600">Салбарын нэр *</span><input id="branch-name" required placeholder="Жишээ: Салбар 4" class="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-primary"></label>
+          <label class="block"><span class="text-[12px] font-bold text-slate-600">Хариуцсан хүний нэр *</span><input id="manager-name" required placeholder="Нэр" class="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-primary"></label>
+          <label class="block"><span class="text-[12px] font-bold text-slate-600">Утасны дугаар *</span><input id="phone" required placeholder="010-0000-0000" class="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-primary"></label>
+          <div class="grid grid-cols-2 gap-3">
+            <label><span class="text-[12px] font-bold text-slate-600">Энгийн 1кг (₩)</span><input id="standard-price" type="number" min="0" required class="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-primary"></label>
+            <label><span class="text-[12px] font-bold text-slate-600">Экспресс 1кг (₩)</span><input id="express-price" type="number" min="0" required class="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-primary"></label>
+          </div>
+          <label class="block"><span class="text-[12px] font-bold text-slate-600">Ачаа авах хот / бүс</span><textarea id="service-area" rows="3" class="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-primary"></textarea></label>
+          <label class="block"><span class="text-[12px] font-bold text-slate-600">Дараалал</span><input id="sort-order" type="number" min="0" value="0" class="mt-1.5 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] outline-none focus:border-primary"></label>
+          <label class="flex items-center gap-2 text-[13px] font-semibold"><input id="active" type="checkbox" checked class="w-4 h-4 accent-blue-500">Хэрэглэгчид харуулах</label>
+          <button id="save-btn" class="w-full bg-primary text-white rounded-xl py-3.5 font-bold text-[14px]">Хадгалах</button>
+        </form>
+      </section>
+
+      <section>
+        <div class="flex items-center justify-between mb-4 px-1">
+          <h2 class="font-bold text-[17px]">Бүртгэлтэй салбарууд</h2>
+          <span id="branch-count" class="text-[11px] font-bold text-primary bg-blue-100 px-2.5 py-1 rounded-lg"></span>
+        </div>
+        <div id="branch-list" class="grid md:grid-cols-2 gap-4"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    let branches = [];
+    const $ = id => document.getElementById(id);
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[char]);
+    const adminHeaders = (json = false) => ({
+      ...(json ? { 'Content-Type': 'application/json' } : {}),
+      Authorization: `Bearer ${localStorage.getItem('admin_session') || ''}`
+    });
+
+    function toggleSidebar() {
+      $('sidebar').classList.toggle('-translate-x-full');
+      $('sidebar-overlay').classList.toggle('hidden');
+    }
+
+    async function loadBranches() {
+      const response = await fetch('/api/branches?admin=1', { headers: adminHeaders() });
+      if (!response.ok) throw new Error('Салбарын мэдээлэл татаж чадсангүй.');
+      branches = await response.json();
+      renderBranches();
+    }
+
+    function renderBranches() {
+      $('branch-count').textContent = `${branches.length} салбар`;
+      $('branch-list').innerHTML = branches.length ? branches.map(branch => `
+        <article class="bg-white rounded-3xl p-5 shadow-card border border-blue-100/50 ${branch.active ? '' : 'opacity-60'}">
+          <div class="flex justify-between gap-4">
+            <div>
+              <h3 class="font-black text-[16px]">${escapeHtml(branch.name)}</h3>
+              <p class="text-[12px] text-slate-500 mt-1">${branch.active ? 'Хэрэглэгчид харагдана' : 'Нуугдсан'}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="editBranch(${branch.id})" class="w-9 h-9 rounded-xl bg-slate-100 text-primary"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+              <button onclick="deleteBranch(${branch.id})" class="w-9 h-9 rounded-xl bg-red-50 text-red-500"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+            </div>
+          </div>
+          <div class="mt-4 space-y-2 text-[13px]">
+            <p><b>Хариуцагч:</b> ${escapeHtml(branch.manager_name)}</p>
+            <p><b>Утас:</b> ${escapeHtml(branch.phone)}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <div class="bg-blue-50 rounded-xl p-3"><p class="text-[10px] font-bold text-blue-500">ЭНГИЙН 1КГ</p><p class="font-black text-blue-700 mt-1">${Number(branch.standard_price).toLocaleString()} ₩</p></div>
+            <div class="bg-amber-50 rounded-xl p-3"><p class="text-[10px] font-bold text-amber-600">ЭКСПРЕСС 1КГ</p><p class="font-black text-amber-700 mt-1">${Number(branch.express_price).toLocaleString()} ₩</p></div>
+          </div>
+          ${branch.service_area ? `<p class="mt-3 text-[12px] text-slate-500 leading-relaxed">${escapeHtml(branch.service_area)}</p>` : ''}
+        </article>`).join('') : '<div class="col-span-full text-center py-16 text-slate-400">Салбар бүртгэгдээгүй байна.</div>';
+    }
+
+    function editBranch(id) {
+      const branch = branches.find(item => item.id === id);
+      if (!branch) return;
+      $('branch-id').value = branch.id;
+      $('branch-name').value = branch.name;
+      $('manager-name').value = branch.manager_name;
+      $('phone').value = branch.phone;
+      $('standard-price').value = branch.standard_price;
+      $('express-price').value = branch.express_price;
+      $('service-area').value = branch.service_area || '';
+      $('sort-order').value = branch.sort_order || 0;
+      $('active').checked = Boolean(branch.active);
+      $('form-title').textContent = 'Салбар засах';
+      $('cancel-btn').classList.remove('hidden');
+      scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+      $('branch-form').reset();
+      $('branch-id').value = '';
+      $('sort-order').value = branches.length + 1;
+      $('active').checked = true;
+      $('form-title').textContent = 'Шинэ салбар нэмэх';
+      $('cancel-btn').classList.add('hidden');
+    }
+
+    async function deleteBranch(id) {
+      const branch = branches.find(item => item.id === id);
+      if (!confirm(`${branch?.name || 'Салбар'} устгах уу?`)) return;
+      const response = await fetch(`/api/branches?id=${id}`, { method: 'DELETE', headers: adminHeaders() });
+      if (!response.ok) return alert('Устгахад алдаа гарлаа.');
+      resetForm();
+      await loadBranches();
+    }
+
+    $('branch-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const id = Number($('branch-id').value);
+      const payload = {
+        id,
+        name: $('branch-name').value,
+        managerName: $('manager-name').value,
+        phone: $('phone').value,
+        standardPrice: Number($('standard-price').value),
+        expressPrice: Number($('express-price').value),
+        serviceArea: $('service-area').value,
+        sortOrder: Number($('sort-order').value),
+        active: $('active').checked
+      };
+      $('save-btn').disabled = true;
+      const response = await fetch('/api/branches', {
+        method: id ? 'PUT' : 'POST',
+        headers: adminHeaders(true),
+        body: JSON.stringify(payload)
+      });
+      $('save-btn').disabled = false;
+      const result = await response.json();
+      if (!response.ok) return alert(result.error || 'Хадгалахад алдаа гарлаа.');
+      resetForm();
+      await loadBranches();
+    });
+
+    loadBranches().then(resetForm).catch(error => alert(error.message));
+  </script>
+</body>
+</html>

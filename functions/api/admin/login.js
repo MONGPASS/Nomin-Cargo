@@ -9,14 +9,32 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    // Default fallbacks in case env vars aren't set yet during transition
-    const correctId = env.ADMIN_ID || 'admin';
-    const correctPass = env.ADMIN_PASSWORD || 'nominadmin123';
+    const correctId = env.ADMIN_ID;
+    const correctPass = env.ADMIN_PASSWORD;
 
-    if ((id === correctId && password === correctPass) || (id === 'admin' && password === 'admin123')) {
+    if (!correctId || !correctPass) {
+      return new Response(JSON.stringify({ success: false, error: 'Админ нэвтрэх тохиргоо хийгдээгүй байна.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (id === correctId && password === correctPass) {
+       const issuedAt = Date.now().toString();
+       const key = await crypto.subtle.importKey(
+         'raw',
+         new TextEncoder().encode(correctPass),
+         { name: 'HMAC', hash: 'SHA-256' },
+         false,
+         ['sign']
+       );
+       const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(issuedAt));
+       const signatureText = btoa(String.fromCharCode(...new Uint8Array(signature)))
+         .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
        return new Response(JSON.stringify({ 
            success: true, 
-           token: 'admin_auth_token_' + Date.now(), 
+           token: `${issuedAt}.${signatureText}`,
            message: 'Амжилттай нэвтэрлээ' 
        }), {
            status: 200,
