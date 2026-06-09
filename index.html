@@ -664,7 +664,10 @@
         <h2 id="mobile-popup-title" class="text-[20px] font-black text-slate-900 leading-tight"></h2>
         <p id="mobile-popup-subtitle" class="text-[13px] text-slate-500 leading-relaxed mt-2 whitespace-pre-line"></p>
         <a id="mobile-popup-link" href="#" class="mt-5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-primary-dark text-white font-bold text-[15px] flex items-center justify-center shadow-btn"></a>
-        <button type="button" onclick="closeMobilePopup(true)" class="w-full pt-3 text-[12px] font-semibold text-slate-400">Өнөөдөр дахин харуулахгүй</button>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button type="button" onclick="closeMobilePopup(false)" class="py-3 text-[12px] font-bold text-slate-500 bg-slate-100 rounded-xl">Хаах</button>
+          <button type="button" onclick="closeMobilePopup(true)" class="py-3 text-[12px] font-bold text-primary bg-blue-50 rounded-xl">Өнөөдөр дахин харуулахгүй</button>
+        </div>
       </div>
     </div>
   </div>
