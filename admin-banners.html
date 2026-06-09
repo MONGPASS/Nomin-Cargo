@@ -153,6 +153,15 @@
       </div>
       
       <div class="space-y-3">
+        <div>
+          <label class="block text-[12px] font-bold text-slate-700 mb-1.5 pl-1">Баннерын төрөл</label>
+          <select id="banner-type" onchange="updateBannerTypeHint()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] font-bold text-gray-900 outline-none focus:border-primary">
+            <option value="custom">Нүүр хуудасны гулсдаг баннер</option>
+            <option value="popup">Гар утасны попап баннер</option>
+          </select>
+          <p id="banner-type-hint" class="text-[11px] text-slate-400 mt-1.5 pl-1">Санал болгох зураг: 1200×600 (2:1)</p>
+        </div>
+
         <!-- Title Input -->
         <div>
           <label class="block text-[12px] font-bold text-slate-700 mb-1.5 pl-1">Гарчиг (Том текст)</label>
@@ -170,6 +179,16 @@
           <label class="block text-[12px] font-bold text-slate-700 mb-1.5 pl-1">Холбоос (Линк)</label>
           <input type="text" id="banner-link" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
         </div>
+
+        <div>
+          <label class="block text-[12px] font-bold text-slate-700 mb-1.5 pl-1">Товчны текст</label>
+          <input type="text" id="banner-button-text" value="Дэлгэрэнгүй" placeholder="Жишээ: Захиалах" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
+        </div>
+
+        <label class="flex items-center gap-2 px-1 py-1 text-[13px] font-bold text-slate-700">
+          <input type="checkbox" id="banner-active" checked class="w-4 h-4 accent-blue-500">
+          Хэрэглэгчид харуулах
+        </label>
       </div>
       
       <button onclick="saveBanner()" id="save-btn" class="w-full mt-5 py-3.5 rounded-2xl bg-gradient-to-r from-primary to-primary-dark text-white font-bold text-[14px] shadow-btn active:scale-[0.98] hover:shadow-lg transition-all flex items-center justify-center gap-2">
@@ -265,6 +284,10 @@
   <script>
     let banners = [];
     let editingId = null;
+    const adminHeaders = (json = false) => ({
+      ...(json ? { 'Content-Type': 'application/json' } : {}),
+      Authorization: `Bearer ${localStorage.getItem('admin_session') || ''}`
+    });
 
     async function loadBanners() {
         try {
@@ -287,6 +310,13 @@
         drawer.classList.add('-translate-x-full');
         overlay.classList.add('opacity-0', 'pointer-events-none');
       }
+    }
+
+    function updateBannerTypeHint() {
+      const isPopup = document.getElementById('banner-type').value === 'popup';
+      document.getElementById('banner-type-hint').textContent = isPopup
+        ? 'Гар утсанд санал болгох зураг: 900×675 (4:3)'
+        : 'Санал болгох зураг: 1200×600 (2:1)';
     }
 
     // Handle File Upload & Preview
@@ -383,6 +413,9 @@
             <div class="flex-1 overflow-hidden">
               <h4 class="text-[14px] font-bold text-gray-900 mb-0.5 leading-tight truncate px-1">${banner.title || 'Нэргүй баннер'}</h4>
               <p class="text-[11px] text-slate-500 truncate px-1 mb-1.5">${banner.subtitle || '-'}</p>
+              <span class="inline-flex text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 ${banner.type === 'popup' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}">
+                ${banner.type === 'popup' ? 'Гар утасны попап' : 'Гулсдаг баннер'}
+              </span>
               <div class="flex items-center gap-2 text-[11px] font-semibold px-1 ${banner.active ? 'text-success' : 'text-slate-400'}">
                 <span class="w-2 h-2 rounded-full ${banner.active ? 'bg-success' : 'bg-slate-300'}"></span>
                 ${banner.active ? 'Идэвхтэй' : 'Идэвхгүй'}
@@ -418,6 +451,10 @@
       document.getElementById('banner-title').value = banner.title;
       document.getElementById('banner-subtitle').value = banner.subtitle;
       document.getElementById('banner-link').value = banner.linkUrl;
+      document.getElementById('banner-type').value = banner.type === 'popup' ? 'popup' : 'custom';
+      document.getElementById('banner-button-text').value = banner.buttonText || 'Дэлгэрэнгүй';
+      document.getElementById('banner-active').checked = Boolean(banner.active);
+      updateBannerTypeHint();
       
       // Show Preview Map
       const previewContainer = document.getElementById('image-preview-container');
@@ -442,7 +479,11 @@
       document.getElementById('banner-title').value = '';
       document.getElementById('banner-subtitle').value = '';
       document.getElementById('banner-link').value = '';
+      document.getElementById('banner-type').value = 'custom';
+      document.getElementById('banner-button-text').value = 'Дэлгэрэнгүй';
+      document.getElementById('banner-active').checked = true;
       document.getElementById('banner-upload').value = '';
+      updateBannerTypeHint();
       
       const previewContainer = document.getElementById('image-preview-container');
       const placeholder = document.getElementById('upload-placeholder');
@@ -453,7 +494,7 @@
     async function deleteBanner(id) {
       if (confirm("Энэ баннерийг устгахдаа итгэлтэй байна уу?")) {
         try {
-            const res = await fetch(`/api/banners?id=${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/banners?id=${id}`, { method: 'DELETE', headers: adminHeaders() });
             if (res.ok) {
                 await loadBanners();
                 if (editingId === id) cancelEdit();
@@ -476,6 +517,9 @@
       const title = document.getElementById('banner-title').value.trim();
       const subtitle = document.getElementById('banner-subtitle').value.trim();
       const link = document.getElementById('banner-link').value.trim();
+      const type = document.getElementById('banner-type').value;
+      const buttonText = document.getElementById('banner-button-text').value.trim() || 'Дэлгэрэнгүй';
+      const active = document.getElementById('banner-active').checked;
       let previewImageSrc = document.getElementById('image-preview').src;
       const isVisible = !document.getElementById('image-preview-container').classList.contains('hidden');
 
@@ -518,8 +562,8 @@
             // Update existing
             const res = await fetch('/api/banners', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: editingId, title, subtitle, linkUrl: link, imageUrl: previewImageSrc, type: 'custom' })
+                headers: adminHeaders(true),
+                body: JSON.stringify({ id: editingId, title, subtitle, linkUrl: link, imageUrl: previewImageSrc, type, buttonText, active })
             });
             if (res.ok) {
                 alert("Амжилттай шинэчлэгдлээ!");
@@ -532,8 +576,8 @@
             // Add new
             const res = await fetch('/api/banners', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, subtitle, linkUrl: link, imageUrl: previewImageSrc, type: 'custom', active: 1 })
+                headers: adminHeaders(true),
+                body: JSON.stringify({ title, subtitle, linkUrl: link, imageUrl: previewImageSrc, type, buttonText, active })
             });
             if (res.ok) {
                 alert("Шинэ баннер амжилттай нэмэгдлээ!");
@@ -552,7 +596,10 @@
     }
 
     // Initialize list on load
-    document.addEventListener("DOMContentLoaded", loadBanners);
+    document.addEventListener("DOMContentLoaded", () => {
+      updateBannerTypeHint();
+      loadBanners();
+    });
     // Add order notification badges dynamically
     document.addEventListener('DOMContentLoaded', () => {
       let pendingCount = 0;

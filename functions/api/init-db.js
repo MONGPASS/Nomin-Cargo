@@ -59,6 +59,7 @@ export async function onRequest(context) {
         type TEXT,
         imageUrl TEXT NOT NULL,
         linkUrl TEXT,
+        buttonText TEXT DEFAULT 'Дэлгэрэнгүй',
         active INTEGER DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );

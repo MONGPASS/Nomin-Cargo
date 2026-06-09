@@ -171,6 +171,12 @@
       to { transform: translateY(0); }
     }
 
+    @keyframes popupIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .mobile-popup-card { animation: popupIn 0.32s cubic-bezier(0.16, 1, 0.3, 1); }
+
     /* Fade in animation */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(12px); }
@@ -645,6 +651,24 @@
     </button>
   </div>
 
+  <!-- Mobile Popup Banner -->
+  <div id="mobile-popup-overlay" class="fixed inset-0 z-[90] bg-slate-950/55 backdrop-blur-[3px] hidden items-end sm:items-center justify-center p-4 pb-8">
+    <div class="mobile-popup-card w-full max-w-[390px] bg-white rounded-[28px] overflow-hidden shadow-2xl relative">
+      <button type="button" onclick="closeMobilePopup(false)" aria-label="Попап хаах" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/45 text-white backdrop-blur flex items-center justify-center">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+      <div class="aspect-[4/3] bg-slate-100 overflow-hidden">
+        <img id="mobile-popup-image" src="" alt="" class="w-full h-full object-cover">
+      </div>
+      <div class="p-5">
+        <h2 id="mobile-popup-title" class="text-[20px] font-black text-slate-900 leading-tight"></h2>
+        <p id="mobile-popup-subtitle" class="text-[13px] text-slate-500 leading-relaxed mt-2 whitespace-pre-line"></p>
+        <a id="mobile-popup-link" href="#" class="mt-5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-primary-dark text-white font-bold text-[15px] flex items-center justify-center shadow-btn"></a>
+        <button type="button" onclick="closeMobilePopup(true)" class="w-full pt-3 text-[12px] font-semibold text-slate-400">Өнөөдөр дахин харуулахгүй</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom Navigation -->
   <nav class="fixed bottom-0 left-0 w-full z-50 nav-glass shadow-nav border-t border-blue-100/40">
     <div class="flex justify-around items-center px-2 pb-7 pt-2.5 max-w-lg mx-auto">
@@ -676,6 +700,41 @@
   </nav>
 
   <script>
+    let currentPopupId = null;
+
+    function closeMobilePopup(hideToday) {
+      const overlay = document.getElementById('mobile-popup-overlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+      document.body.style.overflow = '';
+      if (hideToday && currentPopupId) {
+        const tomorrow = new Date();
+        tomorrow.setHours(24, 0, 0, 0);
+        localStorage.setItem(`nomin_popup_hidden_${currentPopupId}`, tomorrow.getTime().toString());
+      }
+    }
+
+    function showMobilePopup(banner) {
+      if (!banner || window.innerWidth > 640) return;
+      const hiddenUntil = Number(localStorage.getItem(`nomin_popup_hidden_${banner.id}`) || 0);
+      if (hiddenUntil > Date.now()) return;
+
+      currentPopupId = banner.id;
+      const overlay = document.getElementById('mobile-popup-overlay');
+      const image = document.getElementById('mobile-popup-image');
+      const link = document.getElementById('mobile-popup-link');
+      image.src = banner.imageUrl || '';
+      image.alt = banner.title || 'Попап баннер';
+      document.getElementById('mobile-popup-title').textContent = banner.title || '';
+      document.getElementById('mobile-popup-subtitle').textContent = banner.subtitle || '';
+      link.textContent = banner.buttonText || 'Дэлгэрэнгүй';
+      link.href = banner.linkUrl || '#';
+      link.classList.toggle('hidden', !banner.linkUrl);
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
     let fabOpen = true;
     function toggleFab() {
       const label = document.getElementById('fabLabel');
@@ -758,8 +817,11 @@
         }
       }
 
-      // Filter active banners only
-      const activeBanners = storedBanners.filter(b => b.active !== false);
+      // Popup banners are shown separately from the home carousel.
+      const isActive = banner => banner.active !== false && Number(banner.active) !== 0;
+      const popupBanner = storedBanners.find(b => b.type === 'popup' && isActive(b));
+      const activeBanners = storedBanners.filter(b => b.type !== 'popup' && isActive(b));
+      if (popupBanner) setTimeout(() => showMobilePopup(popupBanner), 350);
 
       const container = document.getElementById('bannerScroll');
       
@@ -772,7 +834,7 @@
       const hasCustomImage = (img) => img && (img.startsWith('data:') || (!img.includes('placehold.co')));
 
       const renderImageBanner = (banner) => {
-        return `<a href="${banner.link || '#'}" class="snap-center shrink-0 w-[82%] rounded-3xl flex flex-col justify-end min-h-[160px] relative overflow-hidden shadow-elevated group">
+        return `<a href="${banner.linkUrl || banner.link || '#'}" class="snap-center shrink-0 w-[82%] rounded-3xl flex flex-col justify-end min-h-[160px] relative overflow-hidden shadow-elevated group">
           <img src="${banner.imageUrl}" alt="${banner.title}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
           <div class="relative z-10 p-5">
@@ -790,7 +852,7 @@
 
         // Fallback: gradient templates for default/placeholder banners
         if (banner.type === 'standard') {
-          return `<a href="${banner.link || '#'}" class="snap-center shrink-0 w-[82%] bg-gradient-to-br from-[#1E3A5F] to-[#0F2442] rounded-3xl p-5 flex flex-col justify-between min-h-[160px] relative overflow-hidden shadow-elevated">
+          return `<a href="${banner.linkUrl || banner.link || '#'}" class="snap-center shrink-0 w-[82%] bg-gradient-to-br from-[#1E3A5F] to-[#0F2442] rounded-3xl p-5 flex flex-col justify-between min-h-[160px] relative overflow-hidden shadow-elevated">
             <div class="absolute top-0 right-0 w-32 h-32 bg-blue-400/10 rounded-full -translate-y-10 translate-x-10"></div>
             <div class="absolute bottom-[-8px] right-3 opacity-[0.08]">
               <span class="material-symbols-outlined text-[72px] text-blue-200 filled">local_shipping</span>
@@ -806,7 +868,7 @@
           </a>`;
         } 
         else if (banner.type === 'express') {
-          return `<a href="${banner.link || '#'}" class="snap-center shrink-0 w-[82%] bg-gradient-to-br from-[#7C2D12] to-[#431407] rounded-3xl p-5 flex flex-col justify-between min-h-[160px] relative overflow-hidden shadow-elevated">
+          return `<a href="${banner.linkUrl || banner.link || '#'}" class="snap-center shrink-0 w-[82%] bg-gradient-to-br from-[#7C2D12] to-[#431407] rounded-3xl p-5 flex flex-col justify-between min-h-[160px] relative overflow-hidden shadow-elevated">
             <div class="absolute top-0 right-0 w-32 h-32 bg-orange-400/10 rounded-full -translate-y-10 translate-x-10"></div>
             <div class="absolute bottom-[-8px] right-3 opacity-[0.08]">
               <span class="material-symbols-outlined text-[72px] text-orange-200 filled">rocket_launch</span>
@@ -822,7 +884,7 @@
           </a>`;
         }
         else if (banner.type === 'promo') {
-          return `<a href="${banner.link || '#'}" class="snap-center shrink-0 w-[82%] bg-gradient-to-br from-[#134E4A] to-[#042F2E] rounded-3xl p-5 flex flex-col justify-between min-h-[160px] relative overflow-hidden shadow-elevated">
+          return `<a href="${banner.linkUrl || banner.link || '#'}" class="snap-center shrink-0 w-[82%] bg-gradient-to-br from-[#134E4A] to-[#042F2E] rounded-3xl p-5 flex flex-col justify-between min-h-[160px] relative overflow-hidden shadow-elevated">
             <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full -translate-y-10 translate-x-10"></div>
             <div class="absolute bottom-[-8px] right-3 opacity-[0.08]">
               <span class="material-symbols-outlined text-[72px] text-emerald-200 filled">redeem</span>
