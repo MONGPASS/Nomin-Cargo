@@ -144,6 +144,51 @@
       </button>
     </section>
 
+    <!-- Popup Notification Management -->
+    <section class="bg-white rounded-3xl p-6 border border-purple-100 shadow-card animate-fade-in-up">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 id="popup-form-title" class="text-[16px] font-bold text-gray-900">Шинэ попап мэдэгдэл</h2>
+          <p class="text-[11px] text-slate-400 mt-1">Нүүр хуудсанд гар утасны том попап хэлбэрээр харагдана.</p>
+        </div>
+        <button id="popup-cancel" type="button" onclick="resetPopupForm()" class="hidden text-[12px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">Болих</button>
+      </div>
+
+      <form id="popup-form" class="grid lg:grid-cols-[280px_1fr] gap-5">
+        <div>
+          <input type="file" id="popup-upload" accept="image/*" class="hidden">
+          <button type="button" id="popup-upload-area" class="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-purple-200 bg-purple-50/40 overflow-hidden relative">
+            <div id="popup-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-5">
+              <span class="material-symbols-outlined text-purple-500 text-[30px]">add_photo_alternate</span>
+              <p class="text-[13px] font-bold text-purple-600 mt-2">Попап зураг оруулах</p>
+              <p class="text-[11px] text-slate-400 mt-1">Санал болгох хэмжээ 900×1200 (3:4)</p>
+            </div>
+            <div id="popup-preview" class="absolute inset-0 hidden">
+              <img id="popup-preview-image" src="" alt="Попап зураг" class="w-full h-full object-cover">
+              <div class="absolute inset-x-0 bottom-0 py-3 bg-black/50 text-white text-[12px] font-bold">Зураг солих</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <label class="block"><span class="block text-[12px] font-bold text-slate-700 mb-1.5">Гарчиг</span><input id="popup-title" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[14px] font-bold outline-none focus:border-primary" placeholder="Жишээ: Зуны тусгай урамшуулал"></label>
+          <label class="block"><span class="block text-[12px] font-bold text-slate-700 mb-1.5">Мэдээлэл</span><textarea id="popup-content" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] outline-none focus:border-primary" placeholder="Попап дээр харагдах дэлгэрэнгүй мэдээлэл"></textarea></label>
+          <label class="block"><span class="block text-[12px] font-bold text-slate-700 mb-1.5">Холбоос</span><input id="popup-link" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] outline-none focus:border-primary" placeholder="Жишээ: order"></label>
+          <label class="block"><span class="block text-[12px] font-bold text-slate-700 mb-1.5">Товчны текст</span><input id="popup-button-text" value="Дэлгэрэнгүй" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[13px] outline-none focus:border-primary"></label>
+          <label class="flex items-center gap-2 text-[13px] font-bold text-slate-700"><input id="popup-active" type="checkbox" checked class="w-4 h-4 accent-purple-500">Хэрэглэгчид харуулах</label>
+          <button id="popup-save" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-[14px] shadow-lg">Попап мэдэгдэл хадгалах</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="animate-fade-in-up">
+      <h3 class="text-[16px] font-bold text-gray-900 mb-4 px-1 flex items-center justify-between">
+        Попап мэдэгдлүүд
+        <span id="popup-count" class="bg-purple-100 text-purple-600 px-2 py-0.5 rounded-md text-[11px] font-bold">0 ширхэг</span>
+      </h3>
+      <div id="popup-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
     <!-- Current Notifications List -->
     <section class="animate-fade-in-up delay-100">
       <h3 class="text-[16px] font-bold text-gray-900 mb-4 px-1 flex items-center justify-between">
@@ -449,5 +494,6 @@
       }
     });
   </script>
+  <script src="popup-admin.js?v=1"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomin-admin-v5';
+const CACHE_NAME = 'nomin-admin-v6';
 const ASSETS_TO_CACHE = [
   '/admin',
   '/admin-orders',
@@ -8,6 +8,7 @@ const ASSETS_TO_CACHE = [
   '/admin-branches',
   '/admin-login',
   '/admin-auth.js',
+  '/popup-admin.js',
   '/styles.css',
   '/images/admin-icon-192.png',
   '/images/admin-icon-512.png'

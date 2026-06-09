@@ -652,22 +652,21 @@
   </div>
 
   <!-- Mobile Popup Banner -->
-  <div id="mobile-popup-overlay" class="fixed inset-0 z-[90] bg-slate-950/55 backdrop-blur-[3px] hidden items-end sm:items-center justify-center p-4 pb-8">
-    <div class="mobile-popup-card w-full max-w-[390px] bg-white rounded-[28px] overflow-hidden shadow-2xl relative">
-      <button type="button" onclick="closeMobilePopup(false)" aria-label="Попап хаах" class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/45 text-white backdrop-blur flex items-center justify-center">
-        <span class="material-symbols-outlined text-[20px]">close</span>
-      </button>
-      <div class="aspect-[4/3] bg-slate-100 overflow-hidden">
-        <img id="mobile-popup-image" src="" alt="" class="w-full h-full object-cover">
-      </div>
-      <div class="p-5">
-        <h2 id="mobile-popup-title" class="text-[20px] font-black text-slate-900 leading-tight"></h2>
-        <p id="mobile-popup-subtitle" class="text-[13px] text-slate-500 leading-relaxed mt-2 whitespace-pre-line"></p>
-        <a id="mobile-popup-link" href="#" class="mt-5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-primary-dark text-white font-bold text-[15px] flex items-center justify-center shadow-btn"></a>
-        <div class="grid grid-cols-2 gap-2 mt-3">
-          <button type="button" onclick="closeMobilePopup(false)" class="py-3 text-[12px] font-bold text-slate-500 bg-slate-100 rounded-xl">Хаах</button>
-          <button type="button" onclick="closeMobilePopup(true)" class="py-3 text-[12px] font-bold text-primary bg-blue-50 rounded-xl">Өнөөдөр дахин харуулахгүй</button>
+  <div id="mobile-popup-overlay" class="fixed inset-0 z-[90] bg-slate-950/45 hidden items-end sm:items-center justify-center">
+    <div class="mobile-popup-card w-full max-w-[490px] bg-white rounded-t-[18px] sm:rounded-[22px] overflow-hidden shadow-2xl">
+      <div class="relative bg-slate-900 aspect-[3/4] max-h-[75vh] overflow-hidden">
+        <img id="mobile-popup-image" src="" alt="" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/55 via-black/5 to-black/65"></div>
+        <div class="absolute top-0 inset-x-0 p-5">
+          <span class="inline-flex px-2.5 py-1 rounded-full bg-white/20 backdrop-blur text-white text-[11px] font-bold">Мэдэгдэл</span>
+          <h2 id="mobile-popup-title" class="text-[24px] font-black text-white leading-tight mt-4 drop-shadow-lg"></h2>
+          <p id="mobile-popup-subtitle" class="text-[14px] text-white/90 leading-relaxed mt-2 whitespace-pre-line drop-shadow-md"></p>
         </div>
+        <a id="mobile-popup-link" href="#" class="absolute left-5 right-5 bottom-5 py-3.5 rounded-2xl bg-white text-primary font-black text-[15px] flex items-center justify-center shadow-xl"></a>
+      </div>
+      <div class="grid grid-cols-2 divide-x divide-slate-200 border-t border-slate-100 bg-white">
+        <button type="button" onclick="closeMobilePopup(true)" class="py-4 text-[13px] font-bold text-slate-700">Өнөөдөр дахин харуулахгүй</button>
+        <button type="button" onclick="closeMobilePopup(false)" class="py-4 text-[13px] font-bold text-slate-900">Хаах</button>
       </div>
     </div>
   </div>
